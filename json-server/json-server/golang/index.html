@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Supplements Shop</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Sports Supplements Shop - CRUD Operations</h1>
+
+    <h2>Collections:</h2>
+    <ul>
+        <li onclick="fetchProducts('Nutrition')">Nutrition</li>
+        <li onclick="fetchProducts('Vitamins')">Vitamins</li>
+        <li onclick="fetchProducts('Steroids')">Steroids</li>
+        <li onclick="fetchProducts('Pre-workouts')">Pre-workouts</li>
+    </ul>
+
+    <div id="productList"></div>
+
+    <h2>Operations:</h2>
+    <button onclick="createProduct()">Create Product</button>
+    <button onclick="getProduct()">Get Product</button>
+    <button onclick="updateProduct()">Update Product</button>
+    <button onclick="deleteProduct()">Delete Product</button>
+
+    <script>
+        const baseUrl = "http://localhost:8080";
+
+        function fetchProducts(collection) {
+            fetch(`${baseUrl}/products?collection=${collection}`)
+                .then(response => response.json())
+                .then(products => {
+                    displayProducts(products);
+                })
+                .catch((error) => console.error("Error:", error));
+        }
+
+        function displayProducts(products) {
+            const productListDiv = document.getElementById("productList");
+            productListDiv.innerHTML = "";
+            if (products.length === 0) {
+                productListDiv.innerHTML = "<p>No products found.</p>";
+                return;
+            }
+
+            let productHTML = "<h3>Products:</h3><ul>";
+            products.forEach(product => {
+                productHTML += `
+                    <li>
+                        <strong>${product.name}</strong> 
+                        <br>Brand: ${product.brand}
+                        <br>Price: $${product.price}
+                        <br>Description: ${product.description}
+                        <br>Stock: ${product.stock}
+                    </li>
+                `;
+            });
+            productHTML += "</ul>";
+            productListDiv.innerHTML = productHTML;
+        }
+
+        function createProduct() {
+            const collection = prompt("Enter Collection (Nutrition, Vitamins, Steroids, Pre-workouts):");
+            const name = prompt("Enter Product Name:");
+            const brand = prompt("Enter Brand:");
+            const price = parseFloat(prompt("Enter Price:"));
+            const description = prompt("Enter Description:");
+            const stock = parseInt(prompt("Enter Stock:"));
+
+            fetch(`${baseUrl}/create?collection=${collection}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, brand, price, description, stock }),
+            })
+            .then((response) => response.json())
+            .then((data) => alert("Product Created: " + JSON.stringify(data)))
+            .catch((error) => console.error("Error:", error));
+        }
+
+        function getProduct() {
+            const collection = prompt("Enter Collection (Nutrition, Vitamins, Steroids, Pre-workouts):");
+            const productId = prompt("Enter Product ID:");
+            fetch(`${baseUrl}/get?collection=${collection}&id=${productId}`)
+                .then((response) => response.json())
+                .then((data) => alert("Product Retrieved: " + JSON.stringify(data)))
+                .catch((error) => console.error("Error:", error));
+        }
+
+        function updateProduct() {
+            const collection = prompt("Enter Collection (Nutrition, Vitamins, Steroids, Pre-workouts):");
+            const productId = prompt("Enter Product ID:");
+            const name = prompt("Enter New Product Name:");
+            const brand = prompt("Enter New Brand Name:");
+            const price = parseFloat(prompt("Enter New Price:"));
+            const description = prompt("Enter New Description:");
+            const stock = parseInt(prompt("Enter New Stock Quantity:"));
+
+            fetch(`${baseUrl}/update?collection=${collection}&id=${productId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, brand, price, description, stock }),
+            })
+            .then((response) => response.json())
+            .then((data) => alert("Product Updated: " + JSON.stringify(data)))
+            .catch((error) => console.error("Error:", error));
+        }
+
+        function deleteProduct() {
+            const collection = prompt("Enter Collection (Nutrition, Vitamins, Steroids, Pre-workouts):");
+            const productId = prompt("Enter Product ID:");
+            fetch(`${baseUrl}/delete?collection=${collection}&id=${productId}`, {
+                method: "DELETE",
+            })
+            .then((response) => response.json())
+            .then((data) => alert("Product Deleted: " + JSON.stringify(data)))
+            .catch((error) => console.error("Error:", error));
+        }
+    </script>
+</body>
+</html>
